@@ -1,0 +1,112 @@
+version: 2
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build_and_test:
+          filters:
+            branches:
+              ignore:
+                - master
+                - develop
+                - /^hotfix.*/
+                - /^release.*/
+  deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - /^hotfix.*/
+                - /^release.*/
+
+jobs:
+  deploy:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-build-bazel-cache-{{ .Branch }}--
+            - v1-build-bazel-cache-master--
+            - v1-build-bazel-cache-
+      - run:
+          name: setup
+          command: |
+            ## ecrは廃止予定なのでコメントアウト。
+            # mkdir -p ~/.docker/
+            # touch ~/.docker/config.json
+            # echo '{"credsStore": "ecr-login"}' >> ~/.docker/config.json
+            sudo apt update
+            sudo apt install amazon-ecr-credential-helper
+            curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+            echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+            sudo apt update && sudo apt install bazel
+            sudo apt update && sudo apt full-upgrade
+      - run:
+          name: setup_gcr
+          command: |
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            sudo apt-get install apt-transport-https ca-certificates gnupg
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update && sudo apt-get install google-cloud-sdk
+            echo $GCP_SERVICE_KEY > gcp-service-key.json
+            gcloud auth activate-service-account --key-file gcp-service-key.json
+            gcloud auth configure-docker --quiet
+      - run:
+          name: version
+          command: bazel version
+      - save_cache:
+          key: v1-build-bazel-cache-{{ .Branch }}--{{ .Revision }}
+          paths:
+            - ./bin
+      # - run:
+      #     name: build
+      #     command: |
+      #       ./bazel.bash $PWD build
+      # - run:
+      #     name: test
+      #     command: echo test
+      # - run:
+      #     name: push
+      #     command: ./bazel.bash $PWD push
+      - run:
+          name: push_gcr
+          command: ./bazel.bash $PWD push_gcr
+  build_and_test:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-build-bazel-cache-{{ .Branch }}--
+            - v1-build-bazel-cache-master--
+            - v1-build-bazel-cache-
+      - run:
+          name: setup
+          command: |
+            sudo apt update
+            sudo apt install amazon-ecr-credential-helper
+            curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+            echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+            sudo apt update && sudo apt install bazel
+            sudo apt update && sudo apt full-upgrade
+      - run:
+          name: version
+          command: bazel version
+      - save_cache:
+          key: v1-build-bazel-cache-{{ .Branch }}--{{ .Revision }}
+          paths:
+            - ./bin
+      - run:
+          name: build # testファイル含めてビルドが通ることを確認する
+          command: |
+            bazel build microservices/... --build_tests_only --define IMAGE_TAG=dummy
+      - run:
+          name: test
+          command: ./bazel.bash $PWD test

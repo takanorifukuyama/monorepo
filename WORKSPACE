@@ -25,6 +25,11 @@ http_archive(
     strip_prefix = "rules_proto-1d6550fc2e625d47dc4faadac92d7cb20e3ba5c5",
 )
 
+go_repository(
+    name = "org_golang_google_grpc",
+    importpath = "github.com/grpc/grpc-go",
+    tag = "v1.16.0",
+)
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
 

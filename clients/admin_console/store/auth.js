@@ -7,12 +7,12 @@ export const store = () => ({
 })
 
 export const getters = {
-    isLoggedIn: state => state.status === "loggedIn"
+    isSignedIn: state => state.status === "signedIn"
 }
 
 export const actions = {
     gotUser({ commit }, user) {
-        commit("setUser")
+        commit("setUser", user)
     },
     logout({ commit }) {
         auth.signOut().then(() => {

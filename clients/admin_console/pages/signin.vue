@@ -1,14 +1,14 @@
 <template>
-    <firebase-auth />
+    <div class="container" >
+        <sign-in-button />
+    </div>
 </template>
 
 <script lang="js">
-import FirebaseAuth from '@/components/FirebaseAuth'
-import { mapState, mapGetters, mapActions } from 'vuex'
+import SignInButton from '@/components/FirebaseAuth'
 export default {
-    name: 'SignIn',
     components: {
-        FirebaseAuth
+        SignInButton,
     }
 }
 </script>

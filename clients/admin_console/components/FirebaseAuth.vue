@@ -1,33 +1,30 @@
 <template lang="html">
-    <firebaseui-auth-container />
+  <div class="container">
+    <button @click="signIn">
+      Sign In
+    </button>
+  </div>
 </template>
 
 <script lang="js">
-import { auth, authProvider } from '@/plugins/firebase'
-import firebaseui from 'firebaseui'
-
 export default {
-  name: "FirebaseAuth",
-  mounted() {
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        const ui = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(auth)
-
-        ui.start('#firebaseui-auth-container', {
-          signInOptions: [
-            authProvider.Google,
-          ],
-          callbacks: {
-            signInSuccessWithAuthResult: (authResult) => {
-              window.location.href = "/"
-              return false
-            }
-          },
-          signInSuccessUrl: "/",
-          signInFlow: 'popup',
-        })
-      }
-    })
-  }
+  name: "SignInButton",
+  methods: {
+    signIn() {
+      console.log("sign in")
+      this.$store.dispatch('auth/signIn')
+    }
+  } 
 }
 </script>
+
+<style scoped>
+.container {
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+</style>

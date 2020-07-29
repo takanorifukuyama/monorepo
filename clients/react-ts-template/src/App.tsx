@@ -3,6 +3,11 @@ import reset from 'styled-reset'
 import { ThemeProvider } from '@material-ui/core'
 import { theme } from 'theme'
 import { createGlobalStyle } from 'styled-components'
+import { Provider } from 'react-redux'
+
+import CountUp from 'ui/page/CountUp'
+
+import store from 'store'
 
 const GloablStyle = createGlobalStyle`
   ${reset}
@@ -10,9 +15,12 @@ const GloablStyle = createGlobalStyle`
 
 const App = () => {
   return (
-    <GloablStyle>
-      <ThemeProvider theme={theme}></ThemeProvider>
-    </GloablStyle>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <GloablStyle />
+        <CountUp />
+      </ThemeProvider>
+    </Provider>
   )
 }
 

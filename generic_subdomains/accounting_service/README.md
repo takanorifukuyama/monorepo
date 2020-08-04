@@ -61,6 +61,8 @@ rectangle "顧客" {
 ```
 ## 会計処理データ
 
+整合性が大事
+
 ```json
 {
   "data": [
@@ -86,3 +88,10 @@ rectangle "顧客" {
 
 - 整合性を保つReconcileAPIを用意
 
+- 状態遷移モデル(state transition models)
+  - なんの処理をどの順で行うか
+  - 処理単位で状態を定義
+  - 途中で落ちても再開すればいい
+  - rollbackも定義
+    - 途中で失敗(fail to try)しても遷移先が異なるだけ
+    - Cancelを行う状態を定義し一貫したモデルで扱う

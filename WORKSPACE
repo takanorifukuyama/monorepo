@@ -1,5 +1,7 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
+## go gazelle
 http_archive(
     name = "io_bazel_rules_go",
     sha256 = "8663604808d2738dc615a2c3eb70eba54a9a982089dd09f6ffe5d0e75771bc4f",
@@ -18,6 +20,15 @@ http_archive(
     ],
 )
 
+## gRPC
+http_archive(
+    name = "build_stack_rules_proto",
+    urls = ["https://github.com/stackb/rules_proto/archive/1d6550fc2e62.tar.gz"],
+    sha256 = "113e6792f5b20679285c86d91c163cc8c4d2b4d24d7a087ae4f233b5d9311012",
+    strip_prefix = "rules_proto-1d6550fc2e625d47dc4faadac92d7cb20e3ba5c5",
+)
+
+
 load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
 
 go_rules_dependencies()
@@ -25,5 +36,34 @@ go_rules_dependencies()
 go_register_toolchains()
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_gazelle//:deps.bzl", "go_repository")
 
 gazelle_dependencies()
+
+go_repository(
+    name = "org_golang_google_grpc",
+    importpath = "github.com/grpc/grpc-go",
+    tag = "v1.16.0",
+)
+
+## NodeJS
+http_archive(
+    name = "build_bazel_rules_nodejs",
+    sha256 = "5bf77cc2d13ddf9124f4c1453dd96063774d755d4fc75d922471540d1c9a8ea8",
+    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/2.0.0/rules_nodejs-2.0.0.tar.gz"],
+)
+
+load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install")
+
+node_repositories(
+    package_json = ["//:package.json"]
+)
+
+yarn_install(
+    name = "npm",
+    package_json = "//:package.json",
+    yarn_lock = "//:yarn.lock",
+)
+
+# load("@npm//:install_bazel_dependencies.bzl", "install_bazel_dependencies")
+# install_bazel_dependencies()

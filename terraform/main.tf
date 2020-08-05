@@ -10,8 +10,8 @@ module "network" {
 
 module "service_accounts" {
   source = "./modules/service_account"
-  halyard_service_accout = module.service_account.halyard_service_accout
-  spin_gcs_service_accout = module.service_account.spin_gcs_service_accout
+  #  halyard_service_accout = module.service_account.halyard_service_accout
+  #  spin_gcs_service_accout = module.service_account.spin_gcs_service_accout
 }
 
 module "gke" {
@@ -44,19 +44,19 @@ module "bastion" {
 }
 
 #module "halyard_vm" {
-#  source = "./modules/halyard_vm"
+#  source = "./modules/halyard_vm"terraform 0.12checklist
 #  halyard_service_accout = module.service_account.halyard_service_accout
 #  spin_gcs_service_accout = module.service_account.spin_gcs_service_accout
 #}
 
+data "google_client_config" "default" {
+}
+
 provider "kubernetes" {
+  load_config_file = false
   host                   = module.gke.cluster_endpoint
-  username               = module.gke.cluster_username
-  password               = module.gke.cluster_password
-  client_certificate     = base64decode(module.gke.client_certificate)
-  client_key             = base64decode(module.gke.client_key)
+  token = data.google_client_config.default.access_token
   cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
-  version                = "~> 1.6"
 }
 
 module "kubernetes" {

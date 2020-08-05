@@ -4,12 +4,12 @@ provider "google" {
 }
 
 provider "kubernetes" {
-  host                   = "${google_container_cluster.gke.endpoint}"
-  username               = "${google_container_cluster.gke.master_auth.0.username}"
-  password               = "${google_container_cluster.gke.master_auth.0.password}"
-  client_certificate     = "${base64decode(google_container_cluster.gke.master_auth.0.client_certificate)}"
-  client_key             = "${base64decode(google_container_cluster.gke.master_auth.0.client_key)}"
-  cluster_ca_certificate = "${base64decode(google_container_cluster.gke.master_auth.0.cluster_ca_certificate)}"
+  host                   = var.google_container_cluster.gke.endpoint
+  username               = var.google_container_cluster.gke.master_auth.0.username
+  password               = var.google_container_cluster.gke.master_auth.0.password
+  client_certificate     = base64decode(var.google_container_cluster.gke.master_auth.0.client_certificate)
+  client_key             = base64decode(var.google_container_cluster.gke.master_auth.0.client_key)
+  cluster_ca_certificate = base64decode(var.google_container_cluster.gke.master_auth.0.cluster_ca_certificate)
   version                = "~> 1.6"
 }
 
@@ -19,7 +19,7 @@ module "network" {
 }
 
 module "service_accounts" {
-  source = "./modules/service_accounts"
+  source = "./modules/service_account"
   halyard_service_accout = module.service_account.halyard_service_accout
   spin_gcs_service_accout = module.service_account.spin_gcs_service_accout
 }

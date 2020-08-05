@@ -43,6 +43,12 @@ module "bastion" {
   cluster_name = module.gke.cluster_name
 }
 
+#module "halyard_vm" {
+#  source = "./modules/halyard_vm"
+#  halyard_service_accout = module.service_account.halyard_service_accout
+#  spin_gcs_service_accout = module.service_account.spin_gcs_service_accout
+#}
+
 provider "kubernetes" {
   host                   = module.gke.cluster_endpoint
   username               = module.gke.cluster_username
@@ -53,6 +59,6 @@ provider "kubernetes" {
   version                = "~> 1.6"
 }
 
-module "kubeernetes" {
-  source = "./modules/kubeernetes"
+module "kubernetes" {
+  source = "./modules/kubernetes"
 }

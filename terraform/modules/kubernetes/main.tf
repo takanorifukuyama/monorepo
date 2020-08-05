@@ -17,7 +17,7 @@ resource "kubernetes_cluster_role_binding" "client-admin-binding" {
 
 resource "kubernetes_namespace" "spinnaker" {
   metadata {
-    annotations {
+    annotations = {
       name = "spinnaker"
     }
 
@@ -26,7 +26,6 @@ resource "kubernetes_namespace" "spinnaker" {
 }
 
 resource "kubernetes_service_account" "spinnaker-sa" {
-  depends_on = ["kubernetes_namespace.spinnaker"]
   metadata {
     name      = "spinnaker-service-account"
     namespace = "spinnaker"
@@ -34,7 +33,6 @@ resource "kubernetes_service_account" "spinnaker-sa" {
 }
 
 resource "kubernetes_cluster_role_binding" "spinnaker-binding-admin" {
-  depends_on = ["kubernetes_namespace.spinnaker"]
   metadata {
     name = "spinnaker-admin"
   }
@@ -96,7 +94,7 @@ resource "kubernetes_cluster_role" "spinnaker-role" {
 }
 
 resource "kubernetes_cluster_role_binding" "spinnaker-role-bindings" {
-  depends_on = ["kubernetes_namespace.spinnaker", "kubernetes_service_account.spinnaker-sa"]
+  depends_on = [kubernetes_namespace.spinnaker, kubernetes_service_account.spinnaker-sa]
   metadata {
     name = "spinnaker-role-binding"
   }

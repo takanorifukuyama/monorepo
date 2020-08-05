@@ -13,6 +13,3 @@ variable "machine_type" {}
 variable "node_min_count" {}
 variable "node_max_count" {}
 variable "disk_size_gb" {}
-
-variable "halyard_service_accout" {}
-variable "spin_gcs_service_accout" {}

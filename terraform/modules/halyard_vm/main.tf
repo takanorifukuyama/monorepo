@@ -4,29 +4,29 @@ data "google_compute_image" "ubuntu_image" {
 }
 
 resource "google_compute_instance" "halyard" {
-  depends_on   = ["google_container_node_pool.spinnaker"]
-  name         = "${var.halyard_vm_name}"
+  depends_on   = [google_container_node_pool.spinnaker]
+  name         = var.halyard_vm_name
   machine_type = "g1-small"
 
   boot_disk {
     initialize_params {
-      image = "${data.google_compute_image.ubuntu_image.self_link}"
+      image = data.google_compute_image.ubuntu_image.self_link
     }
   }
 
   network_interface {
     network       = "default"
-    access_config = {}
+    access_config {}
   }
 
   service_account {
-    email  = "${google_service_account.halyard.email}"
+    email  = var.halyard_service_accout.email
     scopes = ["cloud-platform"]
   }
 
   metadata {
-    "block-project-ssh-keys" = "true"
-    "sshKeys"                = "${var.gcp_account_name}:${file("ssh/halyard_vm_rsa.pub")}"
+    block-project-ssh-keys = true
+    sshKeys                = var.gcp_account_name:file("ssh/halyard_vm_rsa.pub")
   }
 
   provisioner "remote-exec" {
@@ -57,10 +57,11 @@ resource "google_compute_instance" "halyard" {
       "hal config deploy edit --account-name my-k8s-account --type distributed",
       "hal deploy apply",
     ]
-    connection {
+    connection  {
+      host        = self.network_interface.0.access_config.0.nat_ip
       type        = "ssh"
-      user        = "${var.gcp_account_name}"
-      private_key = "${file("ssh/halyard_vm_rsa")}"
+      user        = var.gcp_account_name
+      private_key = file("path/to/rsa/private")
       timeout     = "5m"
     }
   }

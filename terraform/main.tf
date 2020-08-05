@@ -3,9 +3,25 @@ provider "google" {
   project = var.project_name
 }
 
+provider "kubernetes" {
+  host                   = "${google_container_cluster.gke.endpoint}"
+  username               = "${google_container_cluster.gke.master_auth.0.username}"
+  password               = "${google_container_cluster.gke.master_auth.0.password}"
+  client_certificate     = "${base64decode(google_container_cluster.gke.master_auth.0.client_certificate)}"
+  client_key             = "${base64decode(google_container_cluster.gke.master_auth.0.client_key)}"
+  cluster_ca_certificate = "${base64decode(google_container_cluster.gke.master_auth.0.cluster_ca_certificate)}"
+  version                = "~> 1.6"
+}
+
 module "network" {
   source = "./modules/network"
   region = var.region
+}
+
+module "service_accounts" {
+  source = "./modules/service_accounts"
+  halyard_service_accout = module.service_account.halyard_service_accout
+  spin_gcs_service_accout = module.service_account.spin_gcs_service_accout
 }
 
 module "gke" {

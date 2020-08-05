@@ -1,0 +1,17 @@
+name: "Issue Links"
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  issue-link:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Add issue links
+        uses: tkt-actions/add-issue-links@v1.3.0
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          branch-prefix: "/"
+          # ここが true だと、merge 時に issue が close される
+          resolve: "true"

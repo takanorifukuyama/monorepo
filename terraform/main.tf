@@ -3,16 +3,6 @@ provider "google" {
   project = var.project_name
 }
 
-provider "kubernetes" {
-  host                   = var.google_container_cluster.gke.endpoint
-  username               = var.google_container_cluster.gke.master_auth.0.username
-  password               = var.google_container_cluster.gke.master_auth.0.password
-  client_certificate     = base64decode(var.google_container_cluster.gke.master_auth.0.client_certificate)
-  client_key             = base64decode(var.google_container_cluster.gke.master_auth.0.client_key)
-  cluster_ca_certificate = base64decode(var.google_container_cluster.gke.master_auth.0.cluster_ca_certificate)
-  version                = "~> 1.6"
-}
-
 module "network" {
   source = "./modules/network"
   region = var.region
@@ -51,4 +41,18 @@ module "bastion" {
   subnetwork_self_link = module.network.subnetwork_self_link
   members = var.bastion_members
   cluster_name = module.gke.cluster_name
+}
+
+provider "kubernetes" {
+  host                   = module.gke.cluster_endpoint
+  username               = module.gke.cluster_username
+  password               = module.gke.cluster_password
+  client_certificate     = base64decode(module.gke.client_certificate)
+  client_key             = base64decode(module.gke.client_key)
+  cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
+  version                = "~> 1.6"
+}
+
+module "kubeernetes" {
+  source = "./modules/kubeernetes"
 }

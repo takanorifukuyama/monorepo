@@ -49,6 +49,3 @@ module "gke" {
   }
 }
 
-module "kubernetes" {
-  source = "./kubernetes"
-}

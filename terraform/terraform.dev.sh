@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-GOOGLE_BACKEND_CREDENTIALS=$DEV_GOOGLE_CLOUD_KEYFILE_JSON
+GOOGLE_BACKEND_CREDENTIALS="./gcp_sa_credencial.json"
 COMMAND=$1
 OPTION=$2
 
@@ -21,3 +21,4 @@ case $COMMAND in
   exit 1
   ;;
 esac
+

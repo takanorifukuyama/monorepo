@@ -13,3 +13,4 @@ variable "bastion_zone" {}
 variable "bastion_members" {
   type = list(string)
 }
+

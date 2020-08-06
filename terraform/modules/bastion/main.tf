@@ -62,7 +62,7 @@ resource "google_compute_instance_template" "bastion" {
   can_ip_forward = false
 
   disk {
-    source_image = data.google_compute_image.centos_7.self_link
+    source_image = data.google_compute_image.ubuntu_image.self_link
   }
 
   network_interface {
@@ -83,14 +83,15 @@ resource "google_compute_instance_template" "bastion" {
   }
 
   metadata_startup_script = <<EOT
-sudo yum install -y epel-release snapd kubectl git curl
-echo "gcloud container clusters get-credentials ${var.cluster_name} --region asia-northeast1" | sudo tee -a /etc/profile
-sudo systemctl enable --now snapd.socket
-sudo ln -s /var/lib/snapd/snap /snap
-sudo snap list
-sudo snap install helm --classic
-sudo snap install fluxctl --classic
-helm repo add fluxcd https://charts.fluxcd.io
+  KUBECTL_LATEST=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_LATEST/bin/linux/amd64/kubectl
+  chmod +x kubectl
+  sudo mv kubectl /usr/local/bin/kubectl
+  curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/debian/InstallHalyard.sh
+  sudo bash InstallHalyard.sh --user ${var.gcp_account_name} -y
+  . ~/.bashrc
+  gcloud config set container/use_client_certificate true
+  gcloud container clusters get-credentials ${var.gke_cluster_name} --zone=${var.bastion_zone}
 EOT
 }
 
@@ -111,7 +112,7 @@ resource "google_compute_instance_group_manager" "bastion" {
   base_instance_name = "bastion"
 }
 
-data "google_compute_image" "centos_7" {
-  family = "centos-7"
-  project = "gce-uefi-images"
+data "google_compute_image" "ubuntu_image" {
+  family = "ubuntu-1404-trusty-v20190410"
+  project = "ubuntu-os-cloud"
 }

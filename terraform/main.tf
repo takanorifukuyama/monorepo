@@ -8,6 +8,12 @@ module "network" {
   region = var.region
 }
 
+module "service_accounts" {
+  source = "./modules/service_account"
+  #  halyard_service_accout = module.service_account.halyard_service_accout
+  #  spin_gcs_service_accout = module.service_account.spin_gcs_service_accout
+}
+
 module "gke" {
   source = "./modules/gke"
   project_name = var.project_name
@@ -35,4 +41,24 @@ module "bastion" {
   subnetwork_self_link = module.network.subnetwork_self_link
   members = var.bastion_members
   cluster_name = module.gke.cluster_name
+}
+
+#module "halyard_vm" {
+#  source = "./modules/halyard_vm"terraform 0.12checklist
+#  halyard_service_accout = module.service_account.halyard_service_accout
+#  spin_gcs_service_accout = module.service_account.spin_gcs_service_accout
+#}
+
+data "google_client_config" "default" {
+}
+
+provider "kubernetes" {
+  load_config_file = false
+  host                   = module.gke.cluster_endpoint
+  token = data.google_client_config.default.access_token
+  cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
+}
+
+module "kubernetes" {
+  source = "./modules/kubernetes"
 }
